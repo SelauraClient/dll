@@ -45,6 +45,5 @@ public:
     ~Selaura();
 
 private:
-    Selaura() = default;
     std::unordered_map<std::type_index, std::vector<std::function<void(void*)>>> eventHandlers;
 };
