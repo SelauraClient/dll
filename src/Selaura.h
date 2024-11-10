@@ -21,7 +21,7 @@ public:
 
     void init(HINSTANCE hInst);
 
-    template<typename EventType>
+    /*template<typename EventType>
     using EventHandler = std::function<void(EventType&)>;
 
     template<typename EventType>
@@ -40,7 +40,7 @@ public:
                 handler(static_cast<void*>(&event));
             }
         }
-    }
+    }*/
 
     ~Selaura();
 
