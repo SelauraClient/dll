@@ -24,7 +24,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: my-dll
-        path: D:\a\Selaura\Selaura\build\Selaura.dll
+        path: D:\a\Selaura\Selaura\build\Release\Selaura.dll
         if-no-files-found: warn
         include-hidden-files: false
 
