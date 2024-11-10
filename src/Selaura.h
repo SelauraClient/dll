@@ -9,4 +9,5 @@ public:
 
     // funcs
     void init(HINSTANCE hInst);
+    ~Selaura();
 };
