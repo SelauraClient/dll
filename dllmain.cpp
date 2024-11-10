@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include "src/Selaura.h"
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lp) {
     if (GetModuleHandleA("Minecraft.Windows.exe") != GetModuleHandleA(NULL)) {
@@ -7,7 +8,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lp) {
     }
 
     if (fdwReason == DLL_PROCESS_ATTACH) {
-    	// soon
+    	Selaura::get().init(hInstDLL);
     }
 	
     return TRUE;
