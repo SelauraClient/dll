@@ -37,10 +37,12 @@ void Selaura::init(HINSTANCE hInst) {
     }
 
 
+    /*
     Selaura::get().listen<Events::TestEvent>(onTestEvent);
 
     Events::TestEvent event(1);
     Selaura::get().push(event);
+    */
 }
 
 Selaura& Selaura::get() noexcept {
