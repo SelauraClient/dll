@@ -3,6 +3,10 @@ project(Selaura LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 
+if(MSVC)
+    add_compile_options(/await)
+endif()
+
 set(DLL_NAME Selaura)
 
 file(GLOB_RECURSE SOURCE_FILES
