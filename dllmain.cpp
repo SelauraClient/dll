@@ -8,7 +8,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lp) {
     }
 
     if (fdwReason == DLL_PROCESS_ATTACH) {
-    	Selaura::get().init(hInstDLL);
+    	Selaura::get().init(hinstDLL);
     }
 	
     return TRUE;
