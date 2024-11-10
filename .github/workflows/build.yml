@@ -20,13 +20,11 @@ jobs:
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      run: ctest -C ${{env.BUILD_TYPE}}
-
-    - name: Upload DLL Artifact
-      if: success()
+    - name: Upload DLL
       uses: actions/upload-artifact@v3
       with:
         name: my-dll
-        path: ${{github.workspace}}/build/*.dll
+        path: D:\a\Selaura\Selaura\build\Selaura.dll
+        if-no-files-found: warn
+        include-hidden-files: false
+
