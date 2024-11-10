@@ -1,6 +1,10 @@
 #pragma once
 #include <new>
-#include <Windows.h> // Add this line to include HINSTANCE
+#include <Windows.h>
+#include <winrt/Windows.ApplicationModel.Core.h>
+#include <winrt/Windows.UI.Core.h>
+#include <winrt/Windows.UI.ViewManagement.h>
+#include <winrt/Windows.Foundation.h>
 
 class Selaura {
 public:
