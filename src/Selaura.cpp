@@ -1,12 +1,12 @@
 #include "Selaura.h"
 
 namespace {
-	// buffers for saving
-	alignas(Selaura) char SelauraBuffer[sizeof(Selaura)] = {};
-};
+    // buffers for saving
+    alignas(Selaura) char SelauraBuffer[sizeof(Selaura)] = {};
+}
 
 void Selaura::init(HINSTANCE hInst) {
-	new (SelauraBuffer) Selaura;
+    new (SelauraBuffer) Selaura;
 }
 
 Selaura& Selaura::get() noexcept {
