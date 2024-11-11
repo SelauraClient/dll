@@ -27,7 +27,7 @@ void Selaura::init(HINSTANCE hInst) {
         });
     }
 
-    this->hInstDLL = hInst;
+    this->module = hInst;
 }
 
 Selaura& Selaura::get() noexcept {
