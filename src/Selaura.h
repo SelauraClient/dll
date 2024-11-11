@@ -1,6 +1,10 @@
 #pragma once
 #include <new>
 #include <Windows.h>
+#include <functional>
+#include <vector>
+#include <unordered_map>
+#include <typeindex>
 
 #include <winrt/Windows.ApplicationModel.h>
 #include <winrt/Windows.Applicationmodel.core.h>
