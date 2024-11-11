@@ -19,6 +19,15 @@ public:
     void init(HINSTANCE hInst);
     ~Selaura();
 
+    // event system
+    template<typename T>
+    void push(T&& event);
+
+    template<typename T>
+    void listen(std::function<void(T)> callback);
+
+    void notify(const std::type_index& eventType, void* eventData);
+
 private:
     HINSTANCE module;
 };

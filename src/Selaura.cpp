@@ -38,6 +38,28 @@ HINSTANCE Selaura::getCurrentModule() {
     return this->module;
 }
 
+template<typename T>
+void Selaura::push(T&& event) {
+    notify(std::type_index(typeid(T)), static_cast<void*>(&event));
+}
+
+template<typename T>
+void Selaura::listen(std::function<void(T)> callback) {
+    auto wrapper = [callback](void* data) {
+        callback(*static_cast<T*>(data));
+    };
+    listeners[std::type_index(typeid(T))].emplace_back(wrapper);
+}
+
+void Selaura::notify(const std::type_index& eventType, void* eventData) {
+    auto it = listeners.find(eventType);
+    if (it != listeners.end()) {
+        for (auto& listener : it->second) {
+            listener(eventData);
+        }
+    }
+}
+
 Selaura::~Selaura() {
     //clean up, pick up, put away
 }
