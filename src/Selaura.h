@@ -12,6 +12,8 @@
 #include <winrt/Windows.UI.Core.h>
 #include <winrt/Windows.System.h>
 
+#include "hook/HookManager.h"
+
 class Selaura {
 public:
     // gets
