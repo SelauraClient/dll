@@ -22,17 +22,6 @@ public:
     // funcs
     void init(HINSTANCE hInst);
     ~Selaura();
-
-    // event system
-    template<typename T>
-    void push(T&& event);
-
-    template<typename T>
-    void listen(std::function<void(T)> callback);
-
-    void notify(const std::type_index& eventType, void* eventData);
-
 private:
     HINSTANCE module;
-    std::unordered_map<std::type_index, std::vector<std::function<void(void*)>>> listeners;
 };
