@@ -7,15 +7,6 @@ namespace {
     alignas(Selaura) char SelauraBuffer[sizeof(Selaura)] = {};
 }
 
-void onTestEvent(Events::TestEvent& event) {
-    if (!event.isCancelled()) {
-        std::string message = "Test event received with value: " + std::to_string(event.getTest());
-        MessageBoxA(NULL, message.c_str(), "Test Event", MB_OK);
-    } else {
-        MessageBoxA(NULL, "Test event was cancelled.", "Test Event", MB_OK);
-    }
-}
-
 void Selaura::init(HINSTANCE hInst) {
     new (SelauraBuffer) Selaura;
 
@@ -23,7 +14,7 @@ void Selaura::init(HINSTANCE hInst) {
     auto [major, minor, build, revision] = package.Id().Version();
     std::wstring version = std::to_wstring(major) + L"." + std::to_wstring(minor) + L"." + std::to_wstring(build) + L"." + std::to_wstring(revision);
 
-    {
+    { // window title
         std::wstring build_str = std::to_wstring(build);
         if (build_str.length() > 2) {
             build_str = build_str.substr(0, build_str.length() - 2);
@@ -36,17 +27,15 @@ void Selaura::init(HINSTANCE hInst) {
         });
     }
 
-
-    /*
-    Selaura::get().listen<Events::TestEvent>(onTestEvent);
-
-    Events::TestEvent event(1);
-    Selaura::get().push(event);
-    */
+    this->hInstDLL = hInst;
 }
 
 Selaura& Selaura::get() noexcept {
     return *std::launder(reinterpret_cast<Selaura*>(SelauraBuffer));
+}
+
+HINSTANCE Selaura::getCurrentModule() {
+    return this->module;
 }
 
 Selaura::~Selaura() {
