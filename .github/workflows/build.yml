@@ -30,4 +30,5 @@ jobs:
         path: D:\a\Selaura\Selaura\build\Release\Selaura.dll
         if-no-files-found: warn
         include-hidden-files: false
+        zip: false
 
