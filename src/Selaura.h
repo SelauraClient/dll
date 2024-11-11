@@ -24,4 +24,6 @@ public:
     ~Selaura();
 private:
     HINSTANCE module;
+
+    HookManager hookManager;
 };
