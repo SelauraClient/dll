@@ -7,11 +7,26 @@ namespace {
     alignas(Selaura) char SelauraBuffer[sizeof(Selaura)] = {};
 }
 
+void Selaura::setMinecraftTitle(std::wstring title) {
+    CoreApplication::MainView().CoreWindow().DispatcherQueue().TryEnqueue([title = std::move(title)]() {
+        ApplicationView::GetForCurrentView().Title(title);
+    });
+}
+
+SelauraSDK::GameVersion Selaura::getGameVersion() {
+
+    if(!Selaura::gameVersion) {
+        const winrt::Windows::ApplicationModel::Package package = winrt::Windows::ApplicationModel::Package::Current();
+        auto [major, minor, build, revision] = package.Id().Version();
+        Selaura::gameVersion = {minor, minor, build, revision};
+    }
+
+    return Selaura::gameVersion;
+}
+
 void Selaura::init(HINSTANCE hInst) {
     new (SelauraBuffer) Selaura;
 
-    const winrt::Windows::ApplicationModel::Package package = winrt::Windows::ApplicationModel::Package::Current();
-    auto [major, minor, build, revision] = package.Id().Version();
     std::wstring version = std::to_wstring(major) + L"." + std::to_wstring(minor) + L"." + std::to_wstring(build) + L"." + std::to_wstring(revision);
 
     { // window title
@@ -21,16 +36,10 @@ void Selaura::init(HINSTANCE hInst) {
         }
 
         std::wstring title_version = std::to_wstring(major) + L"." + std::to_wstring(minor) + L"." + build_str;
-        std::wstring title = L"Selaura Client v" + title_version;
-        CoreApplication::MainView().CoreWindow().DispatcherQueue().TryEnqueue([title = std::move(title)]() {
-            ApplicationView::GetForCurrentView().Title(title);
-        });
+        Selaura::setMinecraftTitle(L"Selaura Client v" + title_version);
     }
 
-    this->module = hInst;
-
-
-    
+    this->module = hInst;   
 }
 
 Selaura& Selaura::get() noexcept {
@@ -42,5 +51,5 @@ HINSTANCE Selaura::getCurrentModule() {
 }
 
 Selaura::~Selaura() {
-    //clean up, pick up, put away
+    Selaura::setMinecraftTitle(L"");
 }
