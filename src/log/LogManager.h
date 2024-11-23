@@ -28,9 +28,11 @@ public:
 
         std::filesystem::create_directories(logFolder);
         logFilePath = getLogFilePath();
+        
+        // Attempt to open the log file and handle errors
         logFile.open(logFilePath, std::ios::app);
         if (!logFile.is_open()) {
-            std::terminate();
+            showError("Failed to open log file.");
         }
     }
 
@@ -55,13 +57,22 @@ private:
     std::ofstream logFile;
     std::mutex logMutex;
 
+    void showError(const std::string& message) const {
+        MessageBoxA(nullptr, message.c_str(), "Error", MB_ICONERROR | MB_OK);
+    }
+
     template<typename... Args>
     void log(const std::string& level, const Args&... args) {
         std::lock_guard<std::mutex> lock(logMutex);
-        if (logFile.is_open()) {
+        if (!logFile.is_open()) {
+            showError("Log file is not open.");
+            return; // Prevent further execution if log file is not available
+        }
+        
+        try {
             logFile << formatMessage(level, args...) << std::endl;
-        } else {
-            std::terminate();
+        } catch (const std::exception& e) {
+            showError(std::string("Failed to write log: ") + e.what());
         }
     }
 
@@ -76,7 +87,13 @@ private:
         timestampStream << std::put_time(&buf, "%Y-%m-%d %H:%M:%S");
         std::string timestamp = timestampStream.str();
 
-        return std::format("[{}] [{}] {}", timestamp, level, std::vformat("{}", std::make_format_args(args...)));
+        // Format the message safely
+        try {
+            return std::format("[{}] [{}] {}", timestamp, level, std::vformat("{}", std::make_format_args(args...)));
+        } catch (const std::exception& e) {
+            showError(std::string("Formatting error: ") + e.what());
+            return "[ERROR] [LOG MESSAGE FORMAT ERROR]"; // Fallback message
+        }
     }
 
     std::string getLogFilePath() const {
