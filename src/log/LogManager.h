@@ -1,25 +1,20 @@
 #pragma once
 
 #include <filesystem>
+#include <fstream>
 #include <string>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
+#include <sstream>
 #include <mutex>
 #include <iostream>
 #include <format>
 #include <Windows.h>
-#include <fstream>
 
 class LogManager {
 public:
-    LogManager() : logFilePath("") {}
-
-    ~LogManager() {
-        if (logFile.is_open()) {
-            logFile.close();
-        }
-    }
+    LogManager() = default;
 
     void init() {
         char path[MAX_PATH];
@@ -27,13 +22,6 @@ public:
         logFolder = path;
 
         std::filesystem::create_directories(logFolder);
-
-        logFilePath = getLogFilePath();
-        
-        logFile.open(logFilePath, std::ios::app);
-        if (!logFile.is_open()) {
-            showError("Failed to open log file: " + logFilePath);
-        }
     }
 
     template<typename... Args>
@@ -53,38 +41,22 @@ public:
 
 private:
     std::string logFolder;
-    std::string logFilePath;
-    std::ofstream logFile;
     std::mutex logMutex;
-
-    void showError(const std::string& message) const {
-        MessageBoxA(nullptr, message.c_str(), "Log Error", MB_ICONERROR | MB_OK);
-    }
 
     template<typename... Args>
     void log(const std::string& level, const Args&... args) {
         std::lock_guard<std::mutex> lock(logMutex);
-        if (!logFile.is_open()) {
-            showError("Log file is not open.");
-            return;
-        }
-
-        try {
-            logFile << formatMessage(level, args...) << std::endl;
-        } catch (const std::exception& e) {
-            showError(std::string("Failed to write log: ") + e.what());
+        std::ofstream logFile(getLogFilePath(), std::ios::app);
+        if (logFile.is_open()) {
+            logFile << "[" << level << "] " << formatMessage(args...) << std::endl;
+        } else {
+            std::terminate();
         }
     }
 
     template<typename... Args>
-    std::string formatMessage(const std::string& level, const Args&... args) const {
-        auto timeNow = std::chrono::system_clock::now();
-        auto timeT = std::chrono::system_clock::to_time_t(timeNow);
-        std::tm buf;
-        localtime_s(&buf, &timeT);
-
-        std::string timestamp = std::format("{:%Y-%m-%d %H:%M:%S}", buf);
-        return std::format("[{}] [{}] {}", timestamp, level, std::format("{}", args...));
+    std::string formatMessage(const Args&... args) const {
+        return std::vformat("{}", std::make_format_args(args...));
     }
 
     std::string getLogFilePath() const {
@@ -92,6 +64,9 @@ private:
         auto in_time_t = std::chrono::system_clock::to_time_t(now);
         std::tm buf;
         localtime_s(&buf, &in_time_t);
-        return std::format("{}/Selaura_{:%Y-%m-%d_%H-%M-%S}.txt", logFolder, buf);
+        std::ostringstream oss;
+        oss << logFolder << "\\Selaura_"
+            << std::put_time(&buf, "%Y-%m-%d_%H-%M-%S") << ".txt";
+        return oss.str();
     }
 };
