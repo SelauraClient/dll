@@ -1,25 +1,23 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 #include <string>
 #include <chrono>
 #include <ctime>
 #include <iomanip>
-#include <sstream>
 #include <mutex>
 #include <iostream>
 #include <format>
 #include <Windows.h>
+#include <fstream>
 
 class LogManager {
 public:
-    LogManager() : logFile(nullptr) {}
+    LogManager() : logFilePath("") {}
 
     ~LogManager() {
-        if (logFile) {
-            logFile->close();
-            delete logFile;
+        if (logFile.is_open()) {
+            logFile.close();
         }
     }
 
@@ -29,8 +27,9 @@ public:
         logFolder = path;
 
         std::filesystem::create_directories(logFolder);
-        logFile = new std::ofstream(getLogFilePath(), std::ios::app);
-        if (!logFile->is_open()) {
+        logFilePath = getLogFilePath();
+        logFile.open(logFilePath, std::ios::app);
+        if (!logFile.is_open()) {
             std::terminate();
         }
     }
@@ -52,22 +51,28 @@ public:
 
 private:
     std::string logFolder;
+    std::string logFilePath;
+    std::ofstream logFile;
     std::mutex logMutex;
-    std::ofstream* logFile;
 
     template<typename... Args>
     void log(const std::string& level, const Args&... args) {
         std::lock_guard<std::mutex> lock(logMutex);
-        if (logFile && logFile->is_open()) {
-            *logFile << "[" << level << "] " << formatMessage(args...) << std::endl;
+        if (logFile.is_open()) {
+            logFile << formatMessage(level, args...) << std::endl;
         } else {
             std::terminate();
         }
     }
 
     template<typename... Args>
-    std::string formatMessage(const Args&... args) const {
-        return std::vformat("{}", std::make_format_args(args...));
+    std::string formatMessage(const std::string& level, const Args&... args) const {
+        auto timeNow = std::chrono::system_clock::now();
+        auto timeT = std::chrono::system_clock::to_time_t(timeNow);
+        std::tm buf;
+        localtime_s(&buf, &timeT);
+
+        return std::format("[{}] [{}] {}", std::put_time(&buf, "%Y-%m-%d %H:%M:%S"), level, std::vformat("{}", std::make_format_args(args...)));
     }
 
     std::string getLogFilePath() const {
