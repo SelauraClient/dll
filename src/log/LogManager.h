@@ -14,7 +14,14 @@
 
 class LogManager {
 public:
-    LogManager() = default;
+    LogManager() : logFile(nullptr) {}
+
+    ~LogManager() {
+        if (logFile) {
+            logFile->close();
+            delete logFile;
+        }
+    }
 
     void init() {
         char path[MAX_PATH];
@@ -22,6 +29,10 @@ public:
         logFolder = path;
 
         std::filesystem::create_directories(logFolder);
+        logFile = new std::ofstream(getLogFilePath(), std::ios::app);
+        if (!logFile->is_open()) {
+            std::terminate();
+        }
     }
 
     template<typename... Args>
@@ -42,13 +53,13 @@ public:
 private:
     std::string logFolder;
     std::mutex logMutex;
+    std::ofstream* logFile;
 
     template<typename... Args>
     void log(const std::string& level, const Args&... args) {
         std::lock_guard<std::mutex> lock(logMutex);
-        std::ofstream logFile(getLogFilePath(), std::ios::app);
-        if (logFile.is_open()) {
-            logFile << "[" << level << "] " << formatMessage(args...) << std::endl;
+        if (logFile && logFile->is_open()) {
+            *logFile << "[" << level << "] " << formatMessage(args...) << std::endl;
         } else {
             std::terminate();
         }
