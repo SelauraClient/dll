@@ -14,11 +14,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lp) {
     }
 
     if (fdwReason == DLL_PROCESS_ATTACH) {
-        if (injected) {
-            FreeLibrary(hInstDLL);
-            return TRUE;
-        }
-
         DisableThreadLibraryCalls(hinstDLL);
         CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)StartRoutine, hinstDLL, 0, nullptr));
     }
