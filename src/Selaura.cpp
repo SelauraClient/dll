@@ -21,5 +21,5 @@ Selaura::Selaura(HINSTANCE mModule) : module(mModule) {
 }
 
 void Selaura::init() {
-    //this->logManager.info("hello world!");
+    this->logManager.info("hello world!");
 }
