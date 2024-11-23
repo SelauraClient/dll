@@ -12,7 +12,7 @@ void Selaura::unload() {
     CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)FreeLibraryAndExitThread, this->module, 0, nullptr);
 }
 
-LogManager& getLogManager() {
+LogManager& Selaura::getLogManager() {
     return this->logManager;
 }
 
