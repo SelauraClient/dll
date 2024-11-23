@@ -44,6 +44,8 @@
         "stdexcept": "cpp",
         "streambuf": "cpp",
         "typeinfo": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "ctime": "cpp",
+        "chrono": "cpp"
     }
 }
