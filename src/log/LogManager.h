@@ -13,7 +13,14 @@
 class LogManager {
 public:
     LogManager() {
+        createHiddenWindow();
         init();
+    }
+
+    ~LogManager() {
+        if (hwndHidden) {
+            DestroyWindow(hwndHidden);
+        }
     }
 
     void init() {
@@ -25,7 +32,7 @@ public:
         // Create the log directory if it doesn't exist
         std::filesystem::create_directories(logFolder);
 
-        MessageBoxA(nullptr, "LogManager initialized.", "Log Info", MB_OK);
+        showMessage("LogManager initialized.", "Log Info");
     }
 
     template<typename... Args>
@@ -46,6 +53,20 @@ public:
 private:
     std::string logFolder;
     std::mutex logMutex;
+    HWND hwndHidden = nullptr;
+
+    void createHiddenWindow() {
+        WNDCLASS wc = { 0 };
+        wc.lpfnWndProc = DefWindowProc; // Default window procedure
+        wc.hInstance = GetModuleHandle(nullptr);
+        wc.lpszClassName = "HiddenLogWindowClass";
+
+        RegisterClass(&wc);
+        hwndHidden = CreateWindow(wc.lpszClassName, "Hidden Log Window",
+                                   WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
+                                   0, 0, nullptr, nullptr, wc.hInstance, nullptr);
+        ShowWindow(hwndHidden, SW_HIDE); // Hide the window
+    }
 
     template<typename... Args>
     void log(const std::string& level, const Args&... args) {
@@ -58,8 +79,12 @@ private:
             logFile << message << std::endl;
             logFile.close();
         } else {
-            MessageBoxA(nullptr, "Failed to open log file.", "Log Error", MB_OK | MB_ICONERROR);
+            showMessage("Failed to open log file.", "Log Error", MB_ICONERROR);
         }
+    }
+
+    void showMessage(const std::string& message, const std::string& title, UINT iconType = MB_OK) {
+        MessageBoxA(hwndHidden, message.c_str(), title.c_str(), iconType);
     }
 
     template<typename... Args>
