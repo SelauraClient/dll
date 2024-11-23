@@ -17,7 +17,7 @@ LogManager& Selaura::getLogManager() {
 }
 
 Selaura::Selaura(HINSTANCE mModule) : module(mModule) {
-    //this->logManager.init();
+    this->logManager.init();
 }
 
 void Selaura::init() {
