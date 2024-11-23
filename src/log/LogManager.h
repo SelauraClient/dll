@@ -9,6 +9,7 @@
 #include <sstream>
 #include <mutex>
 #include <iostream>
+#include <format>
 #include <Windows.h>
 
 class LogManager {
@@ -53,15 +54,9 @@ private:
         }
     }
 
-    std::string formatMessage(const std::string& message) const {
-        return message;
-    }
-
-    template<typename T, typename... Args>
-    std::string formatMessage(const T& first, const Args&... args) const {
-        std::ostringstream oss;
-        oss << first << " " << formatMessage(args...);
-        return oss.str();
+    template<typename... Args>
+    std::string formatMessage(const Args&... args) const {
+        return std::vformat("{}", std::make_format_args(args...));
     }
 
     std::string getLogFilePath() const {
