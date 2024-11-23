@@ -27,12 +27,12 @@ public:
         logFolder = path;
 
         std::filesystem::create_directories(logFolder);
+
         logFilePath = getLogFilePath();
         
-        // Attempt to open the log file and handle errors
         logFile.open(logFilePath, std::ios::app);
         if (!logFile.is_open()) {
-            showError("Failed to open log file.");
+            showError("Failed to open log file: " + logFilePath);
         }
     }
 
@@ -58,7 +58,7 @@ private:
     std::mutex logMutex;
 
     void showError(const std::string& message) const {
-        MessageBoxA(nullptr, message.c_str(), "Error", MB_ICONERROR | MB_OK);
+        MessageBoxA(nullptr, message.c_str(), "Log Error", MB_ICONERROR | MB_OK);
     }
 
     template<typename... Args>
@@ -66,9 +66,9 @@ private:
         std::lock_guard<std::mutex> lock(logMutex);
         if (!logFile.is_open()) {
             showError("Log file is not open.");
-            return; // Prevent further execution if log file is not available
+            return;
         }
-        
+
         try {
             logFile << formatMessage(level, args...) << std::endl;
         } catch (const std::exception& e) {
@@ -83,17 +83,8 @@ private:
         std::tm buf;
         localtime_s(&buf, &timeT);
 
-        std::ostringstream timestampStream;
-        timestampStream << std::put_time(&buf, "%Y-%m-%d %H:%M:%S");
-        std::string timestamp = timestampStream.str();
-
-        // Format the message safely
-        try {
-            return std::format("[{}] [{}] {}", timestamp, level, std::vformat("{}", std::make_format_args(args...)));
-        } catch (const std::exception& e) {
-            showError(std::string("Formatting error: ") + e.what());
-            return "[ERROR] [LOG MESSAGE FORMAT ERROR]"; // Fallback message
-        }
+        std::string timestamp = std::format("{:%Y-%m-%d %H:%M:%S}", buf);
+        return std::format("[{}] [{}] {}", timestamp, level, std::format("{}", args...));
     }
 
     std::string getLogFilePath() const {
@@ -101,9 +92,6 @@ private:
         auto in_time_t = std::chrono::system_clock::to_time_t(now);
         std::tm buf;
         localtime_s(&buf, &in_time_t);
-        std::ostringstream oss;
-        oss << logFolder << "\\Selaura_"
-            << std::put_time(&buf, "%Y-%m-%d_%H-%M-%S") << ".txt";
-        return oss.str();
+        return std::format("{}/Selaura_{:%Y-%m-%d_%H-%M-%S}.txt", logFolder, buf);
     }
 };
