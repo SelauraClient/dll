@@ -72,7 +72,11 @@ private:
         std::tm buf;
         localtime_s(&buf, &timeT);
 
-        return std::format("[{}] [{}] {}", std::put_time(&buf, "%Y-%m-%d %H:%M:%S"), level, std::vformat("{}", std::make_format_args(args...)));
+        std::ostringstream timestampStream;
+        timestampStream << std::put_time(&buf, "%Y-%m-%d %H:%M:%S");
+        std::string timestamp = timestampStream.str();
+
+        return std::format("[{}] [{}] {}", timestamp, level, std::vformat("{}", std::make_format_args(args...)));
     }
 
     std::string getLogFilePath() const {
