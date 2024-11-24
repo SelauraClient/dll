@@ -13,8 +13,14 @@
 
 class LogManager {
 public:
+    LogManager() = default;
+
     void init() {
-        std::filesystem::create_directories(std::filesystem::path(logFilePath).parent_path());
+        std::filesystem::path logDir = std::filesystem::path(logFilePath).parent_path();
+        if (!std::filesystem::exists(logDir)) {
+            std::filesystem::create_directories(logDir);
+        }
+
         logFile = fopen(logFilePath.c_str(), "a");
         if (!logFile) {
             MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
