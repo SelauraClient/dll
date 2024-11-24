@@ -10,23 +10,22 @@
 #include <filesystem>
 #include <cstdio>
 #include <format>
+#include <unordered_map>
 
 class LogManager {
 public:
-    LogManager() = default;
-
     void init() {
-        std::filesystem::path logDir = std::filesystem::path(logFilePath).parent_path();
+        std::filesystem::path logDir = logFilePath.parent_path();
         if (!std::filesystem::exists(logDir)) {
             std::filesystem::create_directories(logDir);
         }
 
-        logFile = fopen(logFilePath.c_str(), "w+");
+        logFile = fopen(logFilePath.c_str(), "a+");
         if (!logFile) {
             MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
         }
     }
-
+    
     ~LogManager() {
         if (logFile) {
             fclose(logFile);
@@ -39,14 +38,39 @@ public:
     }
 
     template<typename... Args>
-    void warn(const Args&... args) {
-        log("WARN", format(args...));
-    }
-
-    template<typename... Args>
     void error(const Args&... args) {
         log("ERROR", format(args...));
         std::terminate();
+    }
+
+    void resetLog() {
+        if (logFile) {
+            fclose(logFile);
+        }
+        logFile = fopen(logFilePath.c_str(), "w+");
+    }
+
+    void createDir(const std::string& path) {
+        std::filesystem::path dirPath = logFilePath.parent_path() / path;
+        if (!std::filesystem::exists(dirPath)) {
+            std::filesystem::create_directories(dirPath);
+        }
+    }
+
+    void deletePath(const std::string& path) {
+        std::filesystem::path precisePath = logFilePath.parent_path() / path;
+        if (std::filesystem::exists(precisePath)) {
+            std::filesystem::remove_all(precisePath);
+        }
+    }
+
+    std::string readFile(const std::string& path) {
+        std::ifstream fileInput(path);
+        if (!fileInput) return "";
+
+        std::ostringstream content;
+        content << fileInput.rdbuf();
+        return content.str();
     }
 
 private:
@@ -73,7 +97,14 @@ private:
         std::tm local_tm = *std::localtime(&now_time);
 
         std::ostringstream oss;
-        oss << std::put_time(&local_tm, "%H:%M:%S");
+        oss << std::put_time(&local_tm, "%m/%d/%Y %H:%M:%S");
         return oss.str();
+    }
+
+    void writeToFile(const std::string& content, const std::string& path) {
+        std::ofstream fileOutput(path, std::ios::trunc);
+        if (fileOutput) {
+            fileOutput << content;
+        }
     }
 };
