@@ -22,4 +22,6 @@ Selaura::Selaura(HINSTANCE mModule) : module(mModule) {
 
 void Selaura::init() {
     Selaura::get().logManager.info("hiii");
+    Selaura::get().logManager.warn("hiii");
+    Selaura::get().logManager.error("hiii");
 }
