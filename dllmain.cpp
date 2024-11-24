@@ -4,7 +4,6 @@
 #include "src/Selaura.h"
 
 DWORD WINAPI StartRoutine(HINSTANCE hinstDLL) {
-    MessageBoxA(NULL, "loaded", "ok", MB_OK | MB_ICONERROR);
     Selaura::get().init();
     return 0;
 }
