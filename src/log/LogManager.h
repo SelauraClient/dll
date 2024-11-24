@@ -13,6 +13,8 @@
 
 class LogManager {
 public:
+    LogManager() = default;
+
     void init() {
         std::filesystem::path logDir = std::filesystem::path(logFilePath).parent_path();
         if (!std::filesystem::exists(logDir)) {
@@ -43,8 +45,8 @@ public:
 
     template<typename... Args>
     void error(const Args&... args) {
-        std::terminate();
         log("ERROR", format(args...));
+        std::terminate();
     }
 
 private:
