@@ -21,7 +21,7 @@ public:
             std::filesystem::create_directories(logDir);
         }
 
-        logFile = fopen(logFilePath.c_str(), "a+");
+        logFile = fopen(logFilePath.string().c_str(), "a+");
         if (!logFile) {
             MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
         }
@@ -53,7 +53,7 @@ public:
         if (logFile) {
             fclose(logFile);
         }
-        logFile = fopen(logFilePath.c_str(), "w+");
+        logFile = fopen(logFilePath.string().c_str(), "w+");
     }
 
     void createDir(const std::string& path) {
@@ -81,7 +81,7 @@ public:
 
 private:
     FILE* logFile = nullptr;
-    const std::string logFilePath = std::string(getenv("localappdata")) + "\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\RoamingState\\Selaura\\logs.txt";
+    std::filesystem::path logFilePath = std::filesystem::path(getenv("localappdata")) / "Packages" / "Microsoft.MinecraftUWP_8wekyb3d8bbwe" / "RoamingState" / "Selaura" / "logs.txt";
     std::mutex logMutex;
 
     template<typename... Args>
