@@ -9,100 +9,76 @@
 #include <Windows.h>
 #include <filesystem>
 #include <fstream>
+#include <format>
 
 class LogManager {
 public:
     LogManager() {
-        createHiddenWindow();
         init();
     }
 
-    ~LogManager() {
-        if (hwndHidden) {
-            DestroyWindow(hwndHidden);
-        }
+    void init() {
+        std::filesystem::create_directories(logDirectory);
+        logFilePath = logDirectory + "\\Selaura_" + getCurrentTimestamp() + ".txt";
+        logFile.open(logFilePath, std::ios::app);
     }
 
-    void init() {
-        // Set up the log folder
-        char path[MAX_PATH];
-        ExpandEnvironmentStringsA("%localappdata%\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\RoamingState\\Selaura\\logs", path, MAX_PATH);
-        logFolder = path;
-
-        // Create the log directory if it doesn't exist
-        std::filesystem::create_directories(logFolder);
-
-        showMessage("LogManager initialized.", "Log Info");
+    ~LogManager() {
+        if (logFile.is_open()) {
+            logFile.close();
+        }
     }
 
     template<typename... Args>
     void info(const Args&... args) {
-        log("INFO", args...);
+        log("INFO", format(args...));
     }
 
     template<typename... Args>
     void warn(const Args&... args) {
-        log("WARN", args...);
+        log("WARN", format(args...));
     }
 
     template<typename... Args>
     void error(const Args&... args) {
-        log("ERROR", args...);
+        log("ERROR", format(args...));
     }
 
 private:
-    std::string logFolder;
+    std::ofstream logFile;
+    std::string logFilePath;
+    const std::string logDirectory = std::string(getenv("localappdata")) + "\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\RoamingState\\Selaura\\logs";
     std::mutex logMutex;
-    HWND hwndHidden = nullptr;
 
-    void createHiddenWindow() {
-        WNDCLASS wc = { 0 };
-        wc.lpfnWndProc = DefWindowProc; // Default window procedure
-        wc.hInstance = GetModuleHandle(nullptr);
-        wc.lpszClassName = "HiddenLogWindowClass";
+    std::string getCurrentTimestamp() {
+        auto now = std::chrono::system_clock::now();
+        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+        std::tm local_tm = *std::localtime(&now_time);
 
-        RegisterClass(&wc);
-        hwndHidden = CreateWindow(wc.lpszClassName, "Hidden Log Window",
-                                   WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
-                                   0, 0, nullptr, nullptr, wc.hInstance, nullptr);
-        ShowWindow(hwndHidden, SW_HIDE); // Hide the window
-    }
-
-    template<typename... Args>
-    void log(const std::string& level, const Args&... args) {
-        std::lock_guard<std::mutex> lock(logMutex);
-        std::string message = formatMessage(level, args...);
-
-        // Write the log message to a file
-        std::ofstream logFile(getLogFilePath(), std::ios::app);
-        if (logFile.is_open()) {
-            logFile << message << std::endl;
-            logFile.close();
-        } else {
-            showMessage("Failed to open log file.", "Log Error", MB_ICONERROR);
-        }
-    }
-
-    void showMessage(const std::string& message, const std::string& title, UINT iconType = MB_OK) {
-        MessageBoxA(hwndHidden, message.c_str(), title.c_str(), iconType);
-    }
-
-    template<typename... Args>
-    std::string formatMessage(const std::string& level, const Args&... args) const {
         std::ostringstream oss;
-        oss << "[" << level << "] " << std::vformat("{}", std::make_format_args(args...));
+        oss << std::put_time(&local_tm, "%Y%m%d_%H%M%S");
         return oss.str();
     }
 
-    std::string getLogFilePath() const {
+    template<typename... Args>
+    std::string format(const Args&... args) {
+        return std::format(args...);
+    }
+
+    void log(const std::string& level, const std::string& message) {
+        std::lock_guard<std::mutex> guard(logMutex);
+        if (logFile.is_open()) {
+            logFile << "[" << level << "] [" << getCurrentTime() << "] " << message << std::endl;
+        }
+    }
+
+    std::string getCurrentTime() {
         auto now = std::chrono::system_clock::now();
-        auto in_time_t = std::chrono::system_clock::to_time_t(now);
-        std::tm buf;
-        localtime_s(&buf, &in_time_t);
+        auto now_time = std::chrono::system_clock::to_time_t(now);
+        std::tm local_tm = *std::localtime(&now_time);
 
         std::ostringstream oss;
-        oss << logFolder << "\\Selaura_"
-            << std::put_time(&buf, "%Y-%m-%d_%H-%M-%S") << ".txt";
+        oss << std::put_time(&local_tm, "%H:%M:%S");
         return oss.str();
     }
 };
