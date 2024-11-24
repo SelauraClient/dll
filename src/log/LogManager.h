@@ -38,6 +38,7 @@ public:
         log("INFO", format(args...));
     }
 
+    template<typename... Args>
     void warn(const Args&... args) {
         log("WARN", format(args...));
     }
