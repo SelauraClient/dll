@@ -21,7 +21,7 @@ public:
             std::filesystem::create_directories(logDir);
         }
 
-        logFile = fopen(logFilePath.c_str(), "a");
+        logFile = fopen(logFilePath.c_str(), "w+");
         if (!logFile) {
             MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
         }
