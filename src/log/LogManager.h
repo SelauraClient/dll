@@ -13,8 +13,12 @@
 
 class LogManager {
 public:
-    LogManager() {
-        init();
+    void init() {
+        std::filesystem::create_directories(std::filesystem::path(logFilePath).parent_path());
+        logFile = fopen(logFilePath.c_str(), "a");
+        if (!logFile) {
+            MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
+        }
     }
 
     ~LogManager() {
@@ -42,14 +46,6 @@ private:
     FILE* logFile = nullptr;
     const std::string logFilePath = std::string(getenv("localappdata")) + "\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\RoamingState\\Selaura\\logs.txt";
     std::mutex logMutex;
-
-    void init() {
-        std::filesystem::create_directories(std::filesystem::path(logFilePath).parent_path());
-        logFile = fopen(logFilePath.c_str(), "a");
-        if (!logFile) {
-            MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
-        }
-    }
 
     template<typename... Args>
     std::string format(const Args&... args) {
