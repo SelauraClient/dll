@@ -62,7 +62,7 @@ private:
 
     template<typename... Args>
     std::string format(const Args&... args) {
-        return std::format(args...);
+        return std::vformat("{}", std::make_format_args(args...));
     }
 
     void log(const std::string& level, const std::string& message) {
