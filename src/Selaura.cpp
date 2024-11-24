@@ -21,6 +21,5 @@ Selaura::Selaura(HINSTANCE mModule) : module(mModule) {
 }
 
 void Selaura::init() {
-    MessageBoxA(NULL, "Hello, World!", "Message Box Title", MB_OK);
-    this->logManager.info("hello world!");
+    Selaura::get().logManager.info("hiii");
 }

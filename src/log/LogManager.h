@@ -17,16 +17,6 @@ public:
         init();
     }
 
-    void init() {
-        std::filesystem::create_directories(logDirectory);
-        logFilePath = logDirectory + "\\Selaura_" + getCurrentTimestamp() + ".txt";
-        logFile = fopen(logFilePath.c_str(), "a");
-        if (!logFile) {
-            // Handle error opening file
-            MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
-        }
-    }
-
     ~LogManager() {
         if (logFile) {
             fclose(logFile);
@@ -50,18 +40,15 @@ public:
 
 private:
     FILE* logFile = nullptr;
-    std::string logFilePath;
-    const std::string logDirectory = std::string(getenv("localappdata")) + "\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\RoamingState\\Selaura\\logs";
+    const std::string logFilePath = std::string(getenv("localappdata")) + "\\Packages\\Microsoft.MinecraftUWP_8wekyb3d8bbwe\\RoamingState\\Selaura\\logs.txt";
     std::mutex logMutex;
 
-    std::string getCurrentTimestamp() {
-        auto now = std::chrono::system_clock::now();
-        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
-        std::tm local_tm = *std::localtime(&now_time);
-
-        std::ostringstream oss;
-        oss << std::put_time(&local_tm, "%Y%m%d_%H%M%S");
-        return oss.str();
+    void init() {
+        std::filesystem::create_directories(std::filesystem::path(logFilePath).parent_path());
+        logFile = fopen(logFilePath.c_str(), "a");
+        if (!logFile) {
+            MessageBoxA(NULL, "Failed to open log file!", "Error", MB_OK | MB_ICONERROR);
+        }
     }
 
     template<typename... Args>
@@ -73,7 +60,7 @@ private:
         std::lock_guard<std::mutex> guard(logMutex);
         if (logFile) {
             fprintf(logFile, "[%s] [%s] %s\n", level.c_str(), getCurrentTime().c_str(), message.c_str());
-            fflush(logFile); // Ensure the message is written immediately
+            fflush(logFile);
         }
     }
 
