@@ -5,6 +5,7 @@
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+#include <fstream>
 #include <mutex>
 #include <Windows.h>
 #include <filesystem>
@@ -35,6 +36,10 @@ public:
     template<typename... Args>
     void info(const Args&... args) {
         log("INFO", format(args...));
+    }
+
+    void warn(const Args&... args) {
+        log("WARN", format(args...));
     }
 
     template<typename... Args>
